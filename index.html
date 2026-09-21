@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Trânsito - Angola</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 90%; max-width: 400px; text-align: center; }
+        h3 { color: #333; margin-bottom: 20px; font-size: 18px; text-align: left; }
+        button { display: block; width: 100%; margin: 12px 0; padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 6px; font-size: 16px; transition: background 0.2s; }
+        button:hover { background: #0056b3; }
+        .resultado { font-size: 20px; font-weight: bold; margin-top: 15px; color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="quiz">
+    <h3 id="pergunta">Carregando...</h3>
+    <div id="opcoes"></div>
+</div>
+
+<script>
+    const questoes = [
+        { p: "1. O que significa uma placa vermelha e redonda?", ops: ["A) Pode passar", "B) Proibido", "C) Zona Escolar"], r: 1 },
+        { p: "2. Na rotunda, quem tem prioridade?", ops: ["A) Quem está entrando", "B) Quem já está dentro da rotunda", "C) O carro maior"], r: 1 },
+        { p: "3. Qual é a velocidade máxima dentro da cidade?", ops: ["A) 60 km/h", "B) 80 km/h", "C) 100 km/h"], r: 0 },
+        { p: "4. É Permitido usar o telefone enquanto dirige?", ops: ["A) Sim, se for rápido", "B) Não", "C) Só para atender"], r: 1 },
+        { p: "5. O que é 'lomba' nas ruas de Luanda?", ops: ["A) Um buraco", "B) Quebra-molas", "C) Uma blitz"], r: 1 }
+    ];
+
+    let atual = 0;
+    let acertos = 0;
+
+    function carregarPergunta() {
+        if (atual < questoes.length) {
+            document.getElementById("pergunta").innerText = questoes[atual].p;
+            let divOps = document.getElementById("opcoes");
+            divOps.innerHTML = "";
+            questoes[atual].ops.forEach((opcao, index) => {
+                let btn = document.createElement("button");
+                btn.innerText = opcao;
+                btn.onclick = () => responder(index);
+                divOps.appendChild(btn);
+            });
+        } else {
+            let aprovado = acertos >= 4;
+            let mensagem = aprovado ? "Parabéns! Você ganhou a carta! 🚗💨" : "Não foi dessa vez. Tente novamente para conseguir a carta!";
+            let cor = aprovado ? "#28a745" : "#dc3545";
+            
+            document.getElementById("quiz").innerHTML = `
+                <h2>Fim do Quiz!</h2>
+                <p>Você acertou <b>${acertos}</b> de 5 perguntas.</p>
+                <p class="resultado" style="color: ${cor};">${mensagem}</p>
+                <button onclick="location.reload()" style="background: #6c757d; margin-top: 20px;">Tentar Novamente</button>
+            `;
+        }
+    }
+
+    function responder(escolha) {
+        if (escolha === questoes[atual].r) {
+            acertos++;
+        }
+        atual++;
+        carregarPergunta();
+    }
+
+    carregarPergunta();
+</script>
+
+</body>
+</html>
