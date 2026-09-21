@@ -6,66 +6,132 @@
     <title>Quiz de Trânsito - Angola</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 90%; max-width: 400px; text-align: center; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 90%; max-width: 420px; text-align: center; }
         h3 { color: #333; margin-bottom: 20px; font-size: 18px; text-align: left; }
-        button { display: block; width: 100%; margin: 12px 0; padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 6px; font-size: 16px; transition: background 0.2s; }
+        h2 { color: #0056b3; margin-bottom: 20px; }
+        p { color: #555; text-align: left; font-size: 14px; margin: 5px 0; }
+        input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { display: block; width: 100%; margin: 12px 0; padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; }
         button:hover { background: #0056b3; }
-        .resultado { font-size: 20px; font-weight: bold; margin-top: 15px; color: #28a745; }
+        .opcao-btn { background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left; margin: 8px 0; }
+        .opcao-btn:hover { background: #e2e6ea; }
+        .resultado { font-size: 20px; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="card" id="quiz">
-    <h3 id="pergunta">Carregando...</h3>
-    <div id="opcoes"></div>
+<div class="card" id="app">
+    <!-- ECRÃ DE IDENTIFICAÇÃO -->
+    <div id="tela-inicio">
+        <h2>Exame Teórico de Trânsito</h2>
+        <p>Por favor, insira os seus dados para iniciar:</p>
+        <p>Nome Completo:</p>
+        <input type="text" id="nome" placeholder="Ex: Nivaldo Nascimento">
+        <p>Telefone:</p>
+        <input type="text" id="telefone" placeholder="Ex: +244 923 000 000">
+        <p>Nº do Bilhete de Identidade (BI):</p>
+        <input type="text" id="documento" placeholder="Ex: 001234567LA042">
+        <button onclick="iniciarQuiz()">Iniciar Teste</button>
+    </div>
+
+    <!-- ECRÃ DO QUIZ -->
+    <div id="tela-quiz" style="display:none;">
+        <h3 id="pergunta">Carregando...</h3>
+        <div id="opcoes"></div>
+    </div>
 </div>
 
 <script>
-    const questoes = [
-        { p: "1. O que significa uma placa vermelha e redonda?", ops: ["A) Pode passar", "B) Proibido", "C) Zona Escolar"], r: 1 },
-        { p: "2. Na rotunda, quem tem prioridade?", ops: ["A) Quem está entrando", "B) Quem já está dentro da rotunda", "C) O carro maior"], r: 1 },
-        { p: "3. Qual é a velocidade máxima dentro da cidade?", ops: ["A) 60 km/h", "B) 80 km/h", "C) 100 km/h"], r: 0 },
-        { p: "4. É Permitido usar o telefone enquanto dirige?", ops: ["A) Sim, se for rápido", "B) Não", "C) Só para atender"], r: 1 },
-        { p: "5. O que é 'lomba' nas ruas de Luanda?", ops: ["A) Um buraco", "B) Quebra-molas", "C) Uma blitz"], r: 1 }
+    const perguntas = [
+        {
+            pergunta: "1. Qual é o limite geral de velocidade para veículos ligeiros dentro das localidades em Angola?",
+            opcoes: ["A) 40 km/h", "B) 50 km/h", "C) 60 km/h"],
+            resposta: 1
+        },
+        {
+            pergunta: "2. O que indica um sinal luminoso amarelo intermitente?",
+            opcoes: ["A) Proibição de passagem", "B) Paragem obrigatória", "C) Atenção, dever de ceder passagem com prudência"],
+            resposta: 2
+        },
+        {
+            pergunta: "3. Ao aproximar-se de uma rotunda sem sinalização específica, quem tem prioridade?",
+            opcoes: ["A) Os veículos que já nela circulam", "B) Os veículos que vão entrar à direita", "C) Os veículos pesados"],
+            resposta: 0
+        },
+        {
+            pergunta: "4. É permitido utilizar o telemóvel (smartphone) durante a condução?",
+            opcoes: ["A) Sim, apenas em chamadas rápidas", "B) Não, exceto com sistema de alta-voz ou auricular", "C) Sim, se o carro estiver parado no semáforo"],
+            resposta: 1
+        },
+        {
+            pergunta: "5. Qual é a taxa máxima de álcool no sangue permitida por lei para condutores particulares em Angola?",
+            opcoes: ["A) 0,0 g/l", "B) 0,3 g/l", "C) 0,5 g/l"],
+            resposta: 2
+        }
     ];
 
     let atual = 0;
     let acertos = 0;
+    let dadosCandidato = {};
+
+    function iniciarQuiz() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const documento = document.getElementById('documento').value.trim();
+
+        if (!nome || !telefone || !documento) {
+            alert("Por favor, preencha todos os campos de identificação!");
+            return;
+        }
+
+        dadosCandidato = { nome, telefone, documento };
+        document.getElementById('tela-inicio').style.display = 'none';
+        document.getElementById('tela-quiz').style.display = 'block';
+        carregarPergunta();
+    }
 
     function carregarPergunta() {
-        if (atual < questoes.length) {
-            document.getElementById("pergunta").innerText = questoes[atual].p;
-            let divOps = document.getElementById("opcoes");
-            divOps.innerHTML = "";
-            questoes[atual].ops.forEach((opcao, index) => {
-                let btn = document.createElement("button");
-                btn.innerText = opcao;
-                btn.onclick = () => responder(index);
-                divOps.appendChild(btn);
+        if (atual < perguntas.length) {
+            let q = perguntas[atual];
+            document.getElementById("pergunta").innerText = q.pergunta;
+            let htmlOpcoes = "";
+            q.opcoes.forEach((op, index) => {
+                htmlOpcoes += `<button class="opcao-btn" onclick="verificar(${index})">${op}</button>`;
             });
+            document.getElementById("opcoes").innerHTML = htmlOpcoes;
         } else {
-            let aprovado = acertos >= 4;
-            let mensagem = aprovado ? "Parabéns! Você ganhou a carta! 🚗💨" : "Não foi dessa vez. Tente novamente para conseguir a carta!";
-            let cor = aprovado ? "#28a745" : "#dc3545";
-            
-            document.getElementById("quiz").innerHTML = `
-                <h2>Fim do Quiz!</h2>
-                <p>Você acertou <b>${acertos}</b> de 5 perguntas.</p>
-                <p class="resultado" style="color: ${cor};">${mensagem}</p>
-                <button onclick="location.reload()" style="background: #6c757d; margin-top: 20px;">Tentar Novamente</button>
-            `;
+            mostrarResultado();
         }
     }
 
-    function responder(escolha) {
-        if (escolha === questoes[atual].r) {
+    function verificar(escolha) {
+        if (escolha === perguntas[atual].resposta) {
             acertos++;
         }
         atual++;
         carregarPergunta();
     }
 
-    carregarPergunta();
+    function mostrarResultado() {
+        let mensagem = "";
+        let cor = "";
+        if (acertos >= 4) {
+            mensagem = "Parabéns! Aprovado com sucesso!";
+            cor = "#28a745";
+        } else {
+            mensagem = "Não foi dessa vez. Tente novamente!";
+            cor = "#dc3545";
+        }
+
+        document.getElementById("app").innerHTML = `
+            <h2>Fim do Exame!</h2>
+            <p style="text-align:center;"><b>Candidato:</b> ${dadosCandidato.nome}</p>
+            <p style="text-align:center;"><b>BI:</b> ${dadosCandidato.documento}</p>
+            <p style="text-align:center;">Você acertou <b>${acertos} de 5</b> perguntas.</p>
+            <p class="resultado" style="color: ${cor};">${mensagem}</p>
+            <button onclick="location.reload()">Refazer Exame</button>
+        `;
+    }
 </script>
 
 </body>
